@@ -1,0 +1,28 @@
+name: Build container and deploy to Heroku
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build Docker image
+        run: docker build -t wine-quality .
+      - name: Check that the app loads in the container
+        run: docker run --rm wine-quality python -c "import app"
+
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
+
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY_WINE}}
+          heroku_app_name: "wine-quality-hoyne"
+          heroku_email: "janna.r.hoyne@gmail.com"
+          usedocker: true
+          stack: "container"
