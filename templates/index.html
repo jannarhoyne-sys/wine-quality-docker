@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wine Quality Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>Wine Quality Prediction</h1>
+        <p>Gradient Boosting model trained on 5,318 red and white Vinho Verde wines (UCI).
+           Predicts within 1 point of the tasters' score 86% of the time.</p>
+    </header>
+
+    <div class="card">
+        <p class="note">Gray values are defaults (dataset medians). Leave a box blank to use them.</p>
+
+        <form action="{{ url_for('predict') }}" method="POST">
+            <div class="grid">
+                {# name, label, default (median) value, min, max, unit #}
+                {% set fields = [
+                    ('fixed_acidity', 'Fixed Acidity', 7.0, 3.8, 15.9, 'g/L'),
+                    ('volatile_acidity', 'Volatile Acidity', 0.29, 0.08, 1.58, 'g/L'),
+                    ('citric_acid', 'Citric Acid', 0.31, 0.0, 1.66, 'g/L'),
+                    ('residual_sugar', 'Residual Sugar', 3.0, 0.6, 65.8, 'g/L'),
+                    ('chlorides', 'Chlorides', 0.047, 0.009, 0.611, 'g/L'),
+                    ('free_sulfur_dioxide', 'Free Sulfur Dioxide', 29, 1, 289, 'mg/L'),
+                    ('total_sulfur_dioxide', 'Total Sulfur Dioxide', 118, 6, 440, 'mg/L'),
+                    ('density', 'Density', 0.9949, 0.987, 1.039, 'g/cm³'),
+                    ('pH', 'pH', 3.21, 2.72, 4.01, ''),
+                    ('sulphates', 'Sulphates', 0.51, 0.22, 2.0, 'g/L'),
+                    ('alcohol', 'Alcohol', 10.3, 8.0, 14.9, '% vol')
+                ] %}
+                {% for name, label, default, low, high, unit in fields %}
+                <div class="field">
+                    <label for="{{ name }}">{{ label }}</label>
+                    <input type="number" step="any" id="{{ name }}" name="{{ name }}"
+                           min="{{ low }}" max="{{ high }}"
+                           placeholder="{{ default }}"
+                           value="{{ request.form.get(name, '') }}">
+                    <small>Range {{ low }}–{{ high }} {{ unit }}</small>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit">Predict Quality</button>
+        </form>
+
+        {% if predict is defined %}
+        <div class="result neutral">
+            Predicted quality: {{ predict }} / 10 · {{ label }}
+        </div>
+        <p class="note">
+            Exact model output: {{ raw }}. Most wines in the data score 5–6, so the model tends to pull
+            predictions toward the middle; very good or very poor wines are often under- or over-rated.
+        </p>
+        <a href="{{ url_for('index') }}" class="reset">Reset to defaults</a>
+        {% endif %}
+    </div>
+
+    <footer>
+        For educational purposes only. ·
+        <a href="https://github.com/jannarhoyne-sys/wine-quality-docker">View on GitHub</a>
+        <br>
+        J. Hoyne · ANA680
+    </footer>
+
+</div>
+</body>
+</html>
