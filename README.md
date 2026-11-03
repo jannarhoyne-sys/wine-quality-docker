@@ -50,4 +50,13 @@ Then open http://localhost:5000
 - **ValueError on blank inputs:** after making inputs optional, `app.py` now falls back to each feature's median.
 - **"This command is for Docker apps only" on Heroku:** new Heroku apps use the heroku-24 stack. Added a workflow step to run `heroku stack:set container` before deploying.
 
+### SageMaker training quota (ResourceLimitExceeded)
+- **Error:** The first training job failed with `ResourceLimitExceeded`: "The account-level service limit
+  'ml.m5.large for training job usage' is 0 Instances."
+- **Troubleshooting:** In **Service Quotas → Amazon SageMaker** (region us-east-2), I found that all of my
+  training job quotas were 0, while `ml.m5.xlarge for endpoint usage` was already 16. I submitted a quota
+  increase request to 1 instance for training job usage.
+- **Result:** The request was approved the next day. The training job then ran successfully
+  (114 billable seconds), and the model was deployed to an `ml.m5.xlarge` endpoint, which already had quota.
+
 J. Hoyne ANA680
